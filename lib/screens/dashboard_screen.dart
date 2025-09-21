@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/app_provider.dart';
+import '../providers/theme_provider.dart';
 import '../models/index.dart';
 import '../services/export_service.dart';
+import 'ui_components.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -28,9 +30,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.download),
+            icon: const Icon(Icons.download_outlined),
             onPressed: () => _exportData(context, 'excel'),
-            tooltip: 'Export to Excel',
+            tooltip: 'Export Data',
           ),
         ],
       ),
@@ -43,44 +45,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           }
 
           if (provider.readings.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.analytics,
-                    size: 80,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No data to display',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Add some blood pressure readings to see your analytics',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/add-reading');
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add First Reading'),
-                  ),
-                ],
-              ),
-            );
+            return _buildEmptyState(context);
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Analytics Summary Cards
                 _buildAnalyticsSummary(provider),
@@ -97,92 +66,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildAnalyticsSummary(AppProvider provider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Analytics Summary',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildSummaryCard(
-                title: 'Average Systolic',
-                value: _getAverageSystolic(provider).toStringAsFixed(1),
-                unit: 'mmHg',
-                icon: Icons.favorite,
-                color: Colors.red,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildSummaryCard(
-                title: 'Average Diastolic',
-                value: _getAverageDiastolic(provider).toStringAsFixed(1),
-                unit: 'mmHg',
-                icon: Icons.favorite_border,
-                color: Colors.blue,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildSummaryCard(
-                title: 'Average Pulse',
-                value: _getAveragePulse(provider).toStringAsFixed(1),
-                unit: 'bpm',
-                icon: Icons.accessibility,
-                color: Colors.green,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildSummaryCard(
-                title: 'Total Readings',
-                value: provider.readings.length.toString(),
-                unit: '',
-                icon: Icons.analytics,
-                color: Colors.purple,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+  Widget _buildEmptyState(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
-  Widget _buildSummaryCard({
-    required String title,
-    required String value,
-    required String unit,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Card(
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(32),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 32),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: themeProvider.surfaceColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: themeProvider.subtleTextColor.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.analytics_outlined,
+                size: 64,
+                color: themeProvider.subtleTextColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'No Data Yet',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 8),
             Text(
-              '$value $unit',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+              'Start tracking your blood pressure to see\nyour analytics and insights here',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: themeProvider.subtleTextColor,
               ),
-            ),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            ModernButton(
+              text: 'Add First Reading',
+              icon: Icons.add,
+              onPressed: () {
+                Navigator.pushNamed(context, '/add-reading');
+              },
             ),
           ],
         ),
@@ -190,31 +120,102 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildChartsSection(AppProvider provider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Charts & Trends',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
+  Widget _buildAnalyticsSummary(AppProvider provider) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Health Summary',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: AnalyticsCard(
+                  title: 'Avg Systolic',
+                  value: _getAverageSystolic(provider).toStringAsFixed(0),
+                  unit: 'mmHg',
+                  icon: Icons.favorite,
+                  color: const Color(0xFFFF6B6B), // Soft red
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: AnalyticsCard(
+                  title: 'Avg Diastolic',
+                  value: _getAverageDiastolic(provider).toStringAsFixed(0),
+                  unit: 'mmHg',
+                  icon: Icons.favorite_border,
+                  color: const Color(0xFF4ECDC4), // Soft teal
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: AnalyticsCard(
+                  title: 'Avg Pulse',
+                  value: _getAveragePulse(provider).toStringAsFixed(0),
+                  unit: 'bpm',
+                  icon: Icons.monitor_heart,
+                  color: const Color(0xFF45B7D1), // Soft blue
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: AnalyticsCard(
+                  title: 'Total Readings',
+                  value: provider.readings.length.toString(),
+                  unit: '',
+                  icon: Icons.analytics_outlined,
+                  color: themeProvider.primaryColor,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
-        // Blood Pressure Trend Chart
-        _buildBPTrendChart(provider),
 
-        const SizedBox(height: 16),
+  Widget _buildChartsSection(AppProvider provider) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Trends & Analytics',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
 
-        // Morning vs Evening Comparison
-        _buildTimeComparisonChart(provider),
+          // Blood Pressure Trend Chart
+          _buildBPTrendChart(provider),
 
-        const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
-        // Medication Effect Analysis
-        _buildMedicationAnalysisChart(provider),
-      ],
+          // Morning vs Evening Comparison
+          _buildTimeComparisonChart(provider),
+
+          const SizedBox(height: 20),
+
+          // Medication Effect Analysis
+          _buildMedicationAnalysisChart(provider),
+        ],
+      ),
     );
   }
 
@@ -227,97 +228,160 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // Sort readings by date
     final sortedReadings = [...readings]..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Blood Pressure Trend (Last 30 Days)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+    return ModernCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.trending_up,
+                color: Provider.of<ThemeProvider>(context).primaryColor,
+                size: 24,
               ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 200,
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= 0 && value.toInt() < sortedReadings.length) {
-                            final date = sortedReadings[value.toInt()].timestamp;
-                            return Text(
-                              '${date.day}/${date.month}',
-                              style: const TextStyle(fontSize: 10),
-                            );
-                          }
-                          return const Text('');
-                        },
-                        interval: (sortedReadings.length / 5).ceil().toDouble(),
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          return Text(
-                            value.toInt().toString(),
-                            style: const TextStyle(fontSize: 10),
-                          );
-                        },
-                        reservedSize: 30,
-                      ),
-                    ),
-                    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  ),
-                  borderData: FlBorderData(show: true),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: sortedReadings.asMap().entries.map((entry) {
-                        return FlSpot(entry.key.toDouble(), entry.value.systolic.toDouble());
-                      }).toList(),
-                      isCurved: true,
-                      color: Colors.red,
-                      barWidth: 3,
-                      dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(show: false),
-                    ),
-                    LineChartBarData(
-                      spots: sortedReadings.asMap().entries.map((entry) {
-                        return FlSpot(entry.key.toDouble(), entry.value.diastolic.toDouble());
-                      }).toList(),
-                      isCurved: true,
-                      color: Colors.blue,
-                      barWidth: 3,
-                      dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(show: false),
-                    ),
-                  ],
-                  minX: 0,
-                  maxX: sortedReadings.length.toDouble() - 1,
-                  minY: 60,
-                  maxY: 180,
+              const SizedBox(width: 12),
+              Text(
+                'Blood Pressure Trend',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 220,
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(
+                      color: Provider.of<ThemeProvider>(context).subtleTextColor.withValues(alpha: 0.2),
+                      strokeWidth: 1,
+                    );
+                  },
+                ),
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        if (value.toInt() >= 0 && value.toInt() < sortedReadings.length) {
+                          final date = sortedReadings[value.toInt()].timestamp;
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              '${date.day}/${date.month}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Provider.of<ThemeProvider>(context).subtleTextColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        }
+                        return const Text('');
+                      },
+                      interval: (sortedReadings.length / 5).ceil().toDouble(),
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Text(
+                            value.toInt().toString(),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Provider.of<ThemeProvider>(context).subtleTextColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      },
+                      reservedSize: 35,
+                    ),
+                  ),
+                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                borderData: FlBorderData(
+                  show: true,
+                  border: Border.all(
+                    color: Provider.of<ThemeProvider>(context).subtleTextColor.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: sortedReadings.asMap().entries.map((entry) {
+                      return FlSpot(entry.key.toDouble(), entry.value.systolic.toDouble());
+                    }).toList(),
+                    isCurved: true,
+                    color: const Color(0xFFFF6B6B),
+                    barWidth: 3,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) {
+                        return FlDotCirclePainter(
+                          radius: 4,
+                          color: Colors.white,
+                          strokeWidth: 2,
+                          strokeColor: const Color(0xFFFF6B6B),
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: const Color(0xFFFF6B6B).withValues(alpha: 0.1),
+                    ),
+                  ),
+                  LineChartBarData(
+                    spots: sortedReadings.asMap().entries.map((entry) {
+                      return FlSpot(entry.key.toDouble(), entry.value.diastolic.toDouble());
+                    }).toList(),
+                    isCurved: true,
+                    color: const Color(0xFF4ECDC4),
+                    barWidth: 3,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) {
+                        return FlDotCirclePainter(
+                          radius: 4,
+                          color: Colors.white,
+                          strokeWidth: 2,
+                          strokeColor: const Color(0xFF4ECDC4),
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: const Color(0xFF4ECDC4).withValues(alpha: 0.1),
+                    ),
+                  ),
+                ],
+                minX: 0,
+                maxX: sortedReadings.length.toDouble() - 1,
+                minY: 60,
+                maxY: 180,
+              ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildLegendItem('Systolic', Colors.red),
-                const SizedBox(width: 24),
-                _buildLegendItem('Diastolic', Colors.blue),
-              ],
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLegendItem('Systolic', const Color(0xFFFF6B6B)),
+              const SizedBox(width: 32),
+              _buildLegendItem('Diastolic', const Color(0xFF4ECDC4)),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -551,33 +615,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildEmptyChartCard(String title, String message) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return ModernCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.show_chart_outlined,
+                color: themeProvider.subtleTextColor,
+                size: 20,
               ),
-            ),
-            const SizedBox(height: 16),
-            Icon(
-              Icons.show_chart,
-              size: 48,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: themeProvider.textColor,
+                ),
               ),
-              textAlign: TextAlign.center,
+            ],
+          ),
+          const SizedBox(height: 20),
+          Icon(
+            Icons.show_chart_outlined,
+            size: 48,
+            color: themeProvider.subtleTextColor.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: themeProvider.subtleTextColor,
             ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -591,12 +666,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white,
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
         ),
         const SizedBox(width: 8),
         Text(
           label,
-          style: const TextStyle(fontSize: 12),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Provider.of<ThemeProvider>(context).textColor,
+          ),
         ),
       ],
     );

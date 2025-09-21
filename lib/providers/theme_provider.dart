@@ -17,24 +17,41 @@ class ThemeProvider extends ChangeNotifier {
   int get colorTheme => _colorTheme;
 
   Color get primaryColor {
-    switch (_colorTheme) {
-      case 1: return const Color(0xFF4CAF50); // Green
-      case 2: return const Color(0xFF9C27B0); // Purple
-      case 3: return const Color(0xFFFF5722); // Orange
-      case 4: return const Color(0xFF2196F3); // Blue
-      default: return const Color(0xFF1976D2); // Default blue
-    }
+    // Modern, soft teal/blue primary color matching the reference image
+    return const Color(0xFF4DB6AC); // Soft teal
   }
 
   Color get secondaryColor {
-    switch (_colorTheme) {
-      case 1: return const Color(0xFF81C784); // Light Green
-      case 2: return const Color(0xFFBA68C8); // Light Purple
-      case 3: return const Color(0xFFFF8A65); // Light Orange
-      case 4: return const Color(0xFF64B5F6); // Light Blue
-      default: return const Color(0xFF03DAC6); // Default teal
-    }
+    // Soft, muted green secondary color
+    return const Color(0xFF81C784); // Light sage green
   }
+
+  // Additional colors for the minimalist design palette
+  Color get accentColor => const Color(0xFF66BB6A); // Fresh green accent
+  Color get surfaceColor => _isDarkMode
+      ? const Color(0xFF2D2D2D) // Dark surface
+      : const Color(0xFFFAFBFF); // Light surface
+
+  Color get cardColor => _isDarkMode
+      ? const Color(0xFF3C3C3C) // Dark card
+      : Colors.white; // Light card
+
+  Color get textColor => _isDarkMode
+      ? const Color(0xFFE0E0E0) // Light text on dark
+      : const Color(0xFF2D2D2D); // Dark text on light
+
+  Color get subtleTextColor => _isDarkMode
+      ? const Color(0xFFB0B0B0) // Subtle text on dark
+      : const Color(0xFF666666); // Subtle text on light
+
+  // Gradient colors for modern card effects
+  Color get gradientStartColor => _isDarkMode
+      ? const Color(0xFF4DB6AC).withValues(alpha: 0.1)
+      : const Color(0xFF4DB6AC).withValues(alpha: 0.05);
+
+  Color get gradientEndColor => _isDarkMode
+      ? const Color(0xFF81C784).withValues(alpha: 0.05)
+      : const Color(0xFF81C784).withValues(alpha: 0.03);
 
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();

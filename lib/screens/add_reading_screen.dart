@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
+import '../providers/theme_provider.dart';
 import '../models/index.dart';
 import 'number_picker.dart';
+import 'ui_components.dart';
 
 class AddReadingScreen extends StatefulWidget {
   const AddReadingScreen({super.key});
@@ -31,18 +33,20 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Blood Pressure Reading'),
+        title: const Text('Add Reading'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Colors.transparent,
+        foregroundColor: themeProvider.textColor,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Reading Values Section
             _buildReadingValuesSection(),
@@ -68,19 +72,30 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
   }
 
   Widget _buildReadingValuesSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: ModernCard(
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Blood Pressure Values',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Icon(
+                  Icons.monitor_heart,
+                  color: Provider.of<ThemeProvider>(context).primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Blood Pressure Values',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Row(
               children: [
                 Expanded(
@@ -97,23 +112,23 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
                     },
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 20),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(12),
+                    color: Provider.of<ThemeProvider>(context).primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Text(
+                  child: Text(
                     '/',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Provider.of<ThemeProvider>(context).primaryColor,
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 20),
                 Expanded(
                   child: NumberPicker(
                     initialValue: _diastolicValue,
@@ -130,7 +145,7 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             NumberPicker(
               initialValue: _pulseValue,
               minValue: 30,
@@ -151,46 +166,57 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
 
 
   Widget _buildTimeMedicationSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: ModernCard(
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Time & Medication',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Icon(
+                  Icons.access_time,
+                  color: Provider.of<ThemeProvider>(context).primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Time & Medication',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // Time of Day
-            _buildSegmentedControl<DayTime>(
+            ModernSegmentedControl<DayTime>(
               title: 'Time of Day',
-              value: _selectedDayTime,
+              selectedValue: _selectedDayTime,
               items: const [
                 {'label': 'Morning', 'value': DayTime.morning},
                 {'label': 'Evening', 'value': DayTime.evening},
               ],
-              onChanged: (value) {
+              onValueChanged: (value) {
                 setState(() {
                   _selectedDayTime = value;
                 });
               },
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // Medication Status
-            _buildSegmentedControl<MedicationStatus>(
+            ModernSegmentedControl<MedicationStatus>(
               title: 'Medication Status',
-              value: _selectedMedicationStatus,
+              selectedValue: _selectedMedicationStatus,
               items: const [
                 {'label': 'Before', 'value': MedicationStatus.before},
                 {'label': 'After', 'value': MedicationStatus.after},
               ],
-              onChanged: (value) {
+              onValueChanged: (value) {
                 setState(() {
                   _selectedMedicationStatus = value;
                 });
@@ -202,87 +228,67 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
     );
   }
 
-  Widget _buildSegmentedControl<T>({
-    required String title,
-    required T value,
-    required List<Map<String, dynamic>> items,
-    required Function(T) onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[300]!),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: items.map((item) {
-              final isSelected = value == item['value'];
-              final index = items.indexOf(item);
-              final isFirst = index == 0;
-              final isLast = index == items.length - 1;
-
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onChanged(item['value']),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.horizontal(
-                        left: isFirst ? const Radius.circular(8) : Radius.zero,
-                        right: isLast ? const Radius.circular(8) : Radius.zero,
-                      ),
-                    ),
-                    child: Text(
-                      item['label'],
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black87,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildNotesSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: ModernCard(
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Additional Notes (Optional)',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Icon(
+                  Icons.note_add,
+                  color: Provider.of<ThemeProvider>(context).primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Additional Notes',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Text(
+                  ' (Optional)',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _notesController,
-              decoration: const InputDecoration(
-                hintText: 'Any additional notes about this reading...',
-                border: OutlineInputBorder(),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Provider.of<ThemeProvider>(context).surfaceColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Provider.of<ThemeProvider>(context).subtleTextColor.withValues(alpha: 0.2),
+                  width: 1,
+                ),
               ),
-              maxLines: 3,
+              child: TextField(
+                controller: _notesController,
+                style: TextStyle(
+                  color: Provider.of<ThemeProvider>(context).textColor,
+                  fontSize: 16,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Any additional notes about this reading...',
+                  hintStyle: TextStyle(
+                    color: Provider.of<ThemeProvider>(context).subtleTextColor,
+                    fontSize: 16,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                maxLines: 3,
+              ),
             ),
           ],
         ),
@@ -291,21 +297,13 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
   }
 
   Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: ModernButton(
+        text: _isSubmitting ? 'Saving...' : 'Save Reading',
+        icon: _isSubmitting ? null : Icons.save,
+        isLoading: _isSubmitting,
         onPressed: _isSubmitting ? null : _submitReading,
-        icon: _isSubmitting
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.save),
-        label: Text(_isSubmitting ? 'Saving...' : 'Save Reading'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-        ),
       ),
     );
   }
