@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/app_provider.dart';
+import '../providers/theme_provider.dart';
 import '../models/index.dart';
+import 'ui_components.dart';
 
 class ReadingsTableScreen extends StatefulWidget {
   const ReadingsTableScreen({super.key});
@@ -68,28 +70,47 @@ class _ReadingsTableScreenState extends State<ReadingsTableScreen> {
   }
 
   Widget _buildEmptyState() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.assignment_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No readings found',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Add your first blood pressure reading to get started',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: themeProvider.surfaceColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: themeProvider.subtleTextColor.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.assignment_outlined,
+                size: 64,
+                color: themeProvider.subtleTextColor,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            Text(
+              'No Readings Yet',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Start tracking your blood pressure to see\nyour complete history here',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: themeProvider.subtleTextColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -103,194 +124,233 @@ class _ReadingsTableScreenState extends State<ReadingsTableScreen> {
         final readings = _groupedReadings![dateKey]!;
         final date = DateTime.parse(dateKey);
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Date Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
+        return ModernCard(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
                       DateFormat('EEEE, MMM dd, yyyy').format(date),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Provider.of<ThemeProvider>(context).textColor,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Provider.of<ThemeProvider>(context).primaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      '${readings.length} reading${readings.length > 1 ? 's' : ''}',
+                      style: TextStyle(
+                        color: Provider.of<ThemeProvider>(context).primaryColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                       ),
-                      child: Text(
-                        '${readings.length} reading${readings.length > 1 ? 's' : ''}',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Horizontal Scrollable Table
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Table Header
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Provider.of<ThemeProvider>(context).surfaceColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Provider.of<ThemeProvider>(context).subtleTextColor.withValues(alpha: 0.2),
+                          width: 1,
                         ),
                       ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 80,
+                            child: Text(
+                              'Time',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Provider.of<ThemeProvider>(context).textColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 70,
+                            child: Text(
+                              'Systolic',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Provider.of<ThemeProvider>(context).textColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 70,
+                            child: Text(
+                              'Diastolic',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Provider.of<ThemeProvider>(context).textColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 60,
+                            child: Text(
+                              'Pulse',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Provider.of<ThemeProvider>(context).textColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 80,
+                            child: Text(
+                              'Status',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Provider.of<ThemeProvider>(context).textColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 70,
+                            child: Text(
+                              'Medication',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Provider.of<ThemeProvider>(context).textColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+
+                    const SizedBox(height: 8),
+
+                    // Reading Rows
+                    ...readings.map((reading) => Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                      margin: const EdgeInsets.only(bottom: 4),
+                      decoration: BoxDecoration(
+                        color: Provider.of<ThemeProvider>(context).surfaceColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Provider.of<ThemeProvider>(context).subtleTextColor.withValues(alpha: 0.1),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 80,
+                            child: Text(
+                              DateFormat('HH:mm').format(reading.timestamp),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Provider.of<ThemeProvider>(context).textColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 70,
+                            child: Text(
+                              '${reading.systolic}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: _getCategoryColor(reading.category),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 70,
+                            child: Text(
+                              '${reading.diastolic}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: _getCategoryColor(reading.category),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 60,
+                            child: Text(
+                              '${reading.pulse}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: _getCategoryColor(reading.category),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 80,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _getCategoryColor(reading.category).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: _getCategoryColor(reading.category).withValues(alpha: 0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                reading.category,
+                                style: TextStyle(
+                                  color: _getCategoryColor(reading.category),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 70,
+                            child: Text(
+                              reading.medicationStatus.toString().split('.').last,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Provider.of<ThemeProvider>(context).subtleTextColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )).toList(),
                   ],
                 ),
-                const SizedBox(height: 16),
-
-                // Table Header
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'Time',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Systolic',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Diastolic',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Pulse',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Status',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Medication',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Reading Rows
-                ...readings.map((reading) => Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.grey.withValues(alpha: 0.2),
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          DateFormat('HH:mm').format(reading.timestamp),
-                          style: const TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          '${reading.systolic}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: _getCategoryColor(reading.category),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          '${reading.diastolic}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: _getCategoryColor(reading.category),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          '${reading.pulse}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: _getCategoryColor(reading.category),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: _getCategoryColor(reading.category).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: _getCategoryColor(reading.category),
-                            ),
-                          ),
-                          child: Text(
-                            reading.category,
-                            style: TextStyle(
-                              color: _getCategoryColor(reading.category),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          reading.medicationStatus.toString().split('.').last,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )).toList(),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },

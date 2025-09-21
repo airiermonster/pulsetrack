@@ -17,13 +17,23 @@ class ThemeProvider extends ChangeNotifier {
   int get colorTheme => _colorTheme;
 
   Color get primaryColor {
-    // Modern, soft teal/blue primary color matching the reference image
-    return const Color(0xFF4DB6AC); // Soft teal
+    switch (_colorTheme) {
+      case 1: return const Color(0xFF4CAF50); // Green
+      case 2: return const Color(0xFF9C27B0); // Purple
+      case 3: return const Color(0xFFFF5722); // Orange
+      case 4: return const Color(0xFF2196F3); // Blue
+      default: return const Color(0xFF4DB6AC); // Default teal
+    }
   }
 
   Color get secondaryColor {
-    // Soft, muted green secondary color
-    return const Color(0xFF81C784); // Light sage green
+    switch (_colorTheme) {
+      case 1: return const Color(0xFF81C784); // Light Green
+      case 2: return const Color(0xFFBA68C8); // Light Purple
+      case 3: return const Color(0xFFFF8A65); // Light Orange
+      case 4: return const Color(0xFF64B5F6); // Light Blue
+      default: return const Color(0xFF81C784); // Default sage green
+    }
   }
 
   // Additional colors for the minimalist design palette

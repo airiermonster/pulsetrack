@@ -68,10 +68,10 @@ class ExportService {
       // Auto-fit columns
       sheet.getRangeByName('A1:I${readings.length + summaryRow + 4}').autoFit();
 
-      // Save file
-      final directory = await getApplicationDocumentsDirectory();
-      final fileName = 'blood_pressure_readings_${DateTime.now().millisecondsSinceEpoch}.xlsx';
-      final path = '${directory.path}/$fileName';
+      // Save file to downloads directory
+      final downloadsDir = await _getDownloadsDirectory();
+      final fileName = 'PulseTrack_BP_Readings_${DateTime.now().toIso8601String().split('T')[0]}.xlsx';
+      final path = '${downloadsDir.path}/$fileName';
 
       final List<int> bytes = workbook.saveAsStream();
       workbook.dispose();
@@ -84,6 +84,22 @@ class ExportService {
       // Error exporting to Excel: $e
       return null;
     }
+  }
+
+  Future<Directory> _getDownloadsDirectory() async {
+    if (Platform.isAndroid) {
+      // On Android, use the Downloads directory
+      final downloadsDir = Directory('/storage/emulated/0/Download');
+      if (await downloadsDir.exists()) {
+        return downloadsDir;
+      }
+    } else if (Platform.isIOS) {
+      // On iOS, use the app's documents directory as Downloads doesn't exist
+      return await getApplicationDocumentsDirectory();
+    }
+
+    // Fallback to app documents directory
+    return await getApplicationDocumentsDirectory();
   }
 
 }

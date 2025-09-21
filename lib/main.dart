@@ -15,15 +15,33 @@ void main() {
   runApp(const PulseTrackApp());
 }
 
-class PulseTrackApp extends StatelessWidget {
+class PulseTrackApp extends StatefulWidget {
   const PulseTrackApp({super.key});
+
+  @override
+  State<PulseTrackApp> createState() => _PulseTrackAppState();
+}
+
+class _PulseTrackAppState extends State<PulseTrackApp> {
+  late ThemeProvider _themeProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeProvider = ThemeProvider();
+    _initializeTheme();
+  }
+
+  Future<void> _initializeTheme() async {
+    await _themeProvider.initialize();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AppProvider()),
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider.value(value: _themeProvider),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -39,11 +57,9 @@ class PulseTrackApp extends StatelessWidget {
                 primary: themeProvider.primaryColor,
                 secondary: themeProvider.secondaryColor,
                 surface: themeProvider.surfaceColor,
-                background: themeProvider.surfaceColor,
                 onPrimary: Colors.white,
                 onSecondary: themeProvider.textColor,
                 onSurface: themeProvider.textColor,
-                onBackground: themeProvider.textColor,
               ),
               // Modern typography
               textTheme: TextTheme(
@@ -97,7 +113,7 @@ class PulseTrackApp extends StatelessWidget {
                 shadowColor: Colors.transparent,
               ),
               // Modern card theme
-              cardTheme: CardTheme(
+              cardTheme: CardThemeData(
                 elevation: 0,
                 margin: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(

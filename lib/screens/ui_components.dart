@@ -50,9 +50,6 @@ class ModernCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: Container(
             padding: padding ?? const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-            ),
             child: child,
           ),
         ),

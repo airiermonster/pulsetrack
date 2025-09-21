@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../models/index.dart';
 import 'quote_carousel.dart';
-import 'edit_reading_screen.dart';
 import 'readings_table_screen.dart';
 
 class HomeScreen extends StatefulWidget {
