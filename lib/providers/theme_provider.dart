@@ -1,0 +1,81 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class ThemeProvider extends ChangeNotifier {
+  static const String _darkModeKey = 'dark_mode';
+  static const String _material3Key = 'material_3';
+  static const String _colorThemeKey = 'color_theme';
+
+  late SharedPreferences _prefs;
+
+  bool _isDarkMode = false;
+  bool _useMaterial3 = true;
+  int _colorTheme = 0;
+
+  bool get isDarkMode => _isDarkMode;
+  bool get useMaterial3 => _useMaterial3;
+  int get colorTheme => _colorTheme;
+
+  Color get primaryColor {
+    switch (_colorTheme) {
+      case 1: return const Color(0xFF4CAF50); // Green
+      case 2: return const Color(0xFF9C27B0); // Purple
+      case 3: return const Color(0xFFFF5722); // Orange
+      case 4: return const Color(0xFF2196F3); // Blue
+      default: return const Color(0xFF1976D2); // Default blue
+    }
+  }
+
+  Color get secondaryColor {
+    switch (_colorTheme) {
+      case 1: return const Color(0xFF81C784); // Light Green
+      case 2: return const Color(0xFFBA68C8); // Light Purple
+      case 3: return const Color(0xFFFF8A65); // Light Orange
+      case 4: return const Color(0xFF64B5F6); // Light Blue
+      default: return const Color(0xFF03DAC6); // Default teal
+    }
+  }
+
+  Future<void> initialize() async {
+    _prefs = await SharedPreferences.getInstance();
+    await _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    _isDarkMode = _prefs.getBool(_darkModeKey) ?? false;
+    _useMaterial3 = _prefs.getBool(_material3Key) ?? true;
+    _colorTheme = _prefs.getInt(_colorThemeKey) ?? 0;
+    notifyListeners();
+  }
+
+  Future<void> setDarkMode(bool value) async {
+    _isDarkMode = value;
+    await _prefs.setBool(_darkModeKey, value);
+    notifyListeners();
+  }
+
+  Future<void> setMaterial3(bool value) async {
+    _useMaterial3 = value;
+    await _prefs.setBool(_material3Key, value);
+    notifyListeners();
+  }
+
+  Future<void> setColorTheme(int value) async {
+    _colorTheme = value;
+    await _prefs.setInt(_colorThemeKey, value);
+    notifyListeners();
+  }
+
+  Future<void> resetToDefaults() async {
+    _isDarkMode = false;
+    _useMaterial3 = true;
+    _colorTheme = 0;
+
+    await _prefs.setBool(_darkModeKey, false);
+    await _prefs.setBool(_material3Key, true);
+    await _prefs.setInt(_colorThemeKey, 0);
+
+    notifyListeners();
+  }
+}
+
